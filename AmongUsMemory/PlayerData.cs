@@ -24,8 +24,6 @@ namespace HamsterCheese.AmongUsMemory
         public IntPtr PlayerControllPTR;
         public string PlayerControllPTROffset;
 
-        public IntPtr PlayerPhysicsPTR;
-        public string PlayerPhysicsPTROffset;
 
         Dictionary<string, CancellationTokenSource> Tokens = new Dictionary<string, CancellationTokenSource>();
 
@@ -57,32 +55,22 @@ namespace HamsterCheese.AmongUsMemory
                     PlayerInfoPTR = ptr.GetAddress();
                     PlayerInfo pInfo = Utils.FromBytes<PlayerInfo>(Cheese.mem.ReadBytes(PlayerInfoPTR, Utils.SizeOf<PlayerInfo>()));
                     PlayerInfoPTROffset = new IntPtr(ptr);
-                    m_pInfo = pInfo;
-                    return m_pInfo;
+                    playerInfo = pInfo;
+                    return playerInfo;
 
                 }
                 else
                 {
                     PlayerInfo pInfo = Utils.FromBytes<PlayerInfo>(Cheese.mem.ReadBytes(PlayerInfoPTR, Utils.SizeOf<PlayerInfo>()));
-                    m_pInfo = pInfo;
-                    return m_pInfo;
+                    playerInfo = pInfo;
+                    return playerInfo;
                 }
 
             }
         }
-        private PlayerInfo? m_pInfo = null;
+        private PlayerInfo? playerInfo = null;
 
-        public PlayerPhysics PlayerPhysics
-        {
-            get
-            {
-                var mpPtr = Instance.MyPhysics;
-                Console.WriteLine("My physics : " + mpPtr.GetAddress());
-                var mpBytes = Cheese.mem.ReadBytes(mpPtr.GetAddress(), Utils.SizeOf<PlayerPhysics>());
-                var mp = Utils.FromBytes<PlayerPhysics>(mpBytes);
-                return mp;
-            }
-        }
+        
         public LightSource LightSource
         {
             get
@@ -99,29 +87,20 @@ namespace HamsterCheese.AmongUsMemory
             var targetPointer = Utils.GetMemberPointer(Instance.myLight, typeof(LightSource), "LightRadius");
             Cheese.mem.WriteMemory(targetPointer.GetAddress(), "float", value.ToString("0.0"));
         }
-        public void WriteMemory_ColorID(byte value)
-        {
-            var targetPointer = Utils.GetMemberPointer(PlayerInfoPTROffset, typeof(PlayerInfo), "ColorId"); 
-            Cheese.mem.WriteMemory(targetPointer.GetAddress(), "byte", value.ToString());
-        }
+
+        /// <summary>
+        /// Set Player Impostor State. *Client Side
+        /// </summary>
+        /// <param name="value"></param> 
         public void WriteMemory_Impostor(byte value)
         {
             var targetPointer = Utils.GetMemberPointer(PlayerInfoPTROffset, typeof(PlayerInfo), "IsImpostor");
             Cheese.mem.WriteMemory(targetPointer.GetAddress(), "byte", value.ToString());
         }
 
-        //I MADE THIS PART
-        public void WriteMemory_Speed(float value)
-        {
-            Console.WriteLine(Instance.MyPhysics);
-            Console.WriteLine(PlayerInfoPTROffset);
-
-            var targetPointer = Utils.GetMemberPointer(Instance.MyPhysics, typeof(PlayerPhysics), "Speed");
-            Cheese.mem.WriteMemory(targetPointer.GetAddress(), "float", value.ToString());
-        }
        
         /// <summary>
-        /// Set Player Dead State.
+        /// Set Player Dead State. *Client Side
         /// </summary>
         /// <param name="value"></param>
         public void WriteMemory_IsDead(byte value)
@@ -150,11 +129,15 @@ namespace HamsterCheese.AmongUsMemory
             Cheese.mem.WriteMemory((targetPointer + 8).GetAddress(), "float", value.b.ToString("0.0"));
             Cheese.mem.WriteMemory((targetPointer + 12).GetAddress(), "float", value.a.ToString("0.0"));
         }
-        public void WriteMemory_Speed(int value, IntPtr pointer)
+
+        //I MADE THIS PART
+        public void WriteMemory_Speed(float value)
         {
-            var targetPointer = Utils.GetMemberPointer(pointer, typeof(PlayerInfo), "Speed");
+            var targetPointer = Utils.GetMemberPointer(Instance.MyPhysics, typeof(PlayerPhysics), "Speed");
+            string test = targetPointer.GetAddress();
             Cheese.mem.WriteMemory(targetPointer.GetAddress(), "float", value.ToString());
         }
+
 
         public void StopObserveState()
         {

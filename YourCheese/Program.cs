@@ -2,13 +2,10 @@
 using HamsterCheese.AmongUsMemory;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace YourCheese
 {
@@ -16,21 +13,23 @@ namespace YourCheese
     {
         public static byte clientImposter = 0;
         public static byte clientDead = 0;
-        public static string[] imposters = new string[] {};
+        public static string[] imposters = new string[] { };
         public static int killdelay = 0;
         public static float lightrange = 5;
-        public static float speed = 2;
+        public static float speed = 8;
     }
     class Program
     {
         static int tableWidth = 75;
 
+
         static List<PlayerData> playerDatas = new List<PlayerData>();
         static List<PlayerPhysics> playerPhysics = new List<PlayerPhysics>();
-        static bool UpdateCheat()
+        static void UpdateCheat()
         {
+       
             while (true)
-            { 
+            {
                 Console.Clear();
                 Console.WriteLine("Test Read Player Datas..");
                 PrintRow("offset", "Name", "OwnerId", "PlayerId", "spawnid", "spawnflag");
@@ -45,10 +44,10 @@ namespace YourCheese
                 {
                     if (data.IsLocalPlayer)
                     {
-                        
+
                         Console.ForegroundColor = ConsoleColor.Green;
                         //set your player name text renderer color
-                        data.WriteMemory_SetNameTextColor(new Color(0,1,0,1)); 
+                        data.WriteMemory_SetNameTextColor(new Color(0, 1, 0, 1));
                     }
 
                     if (data.PlayerInfo.Value.IsDead == 1)
@@ -60,7 +59,7 @@ namespace YourCheese
                     if (data.PlayerInfo.Value.IsImpostor == 1)
                     {
                         Array.Resize(ref Globals.imposters, Globals.imposters.Length + 1);
-                        Globals.imposters[Globals.imposters.Length-1] = Name;
+                        Globals.imposters[Globals.imposters.Length - 1] = Name;
                     }
 
                     if (data.IsLocalPlayer == true)
@@ -71,6 +70,12 @@ namespace YourCheese
 
                         data.WriteMemory_LightRange(Globals.lightrange);
                         data.WriteMemory_Speed(Globals.speed);
+
+                        Console.WriteLine();
+                        Console.WriteLine(data.Instance.MyPhysics);
+                        IntPtr offfff = IntPtr.Add(data.Instance.MyPhysics, 36);
+                        Console.WriteLine(IntPtr.Add(data.Instance.MyPhysics, 36));
+                        Console.WriteLine();
                     }
                     Console.WriteLine();
                     PrintRow($"{(data.IsLocalPlayer == true ? "Me->" : "")}{data.PlayerControllPTROffset}", $"{Name}", $"{data.Instance.OwnerId}", $"{data.Instance.PlayerId}", $"{data.Instance.SpawnId}", $"{data.Instance.SpawnFlags}");
@@ -81,12 +86,11 @@ namespace YourCheese
                 Console.WriteLine("The imposter is: ");
                 Console.WriteLine("[{0}]", string.Join(", ", Globals.imposters));
                 System.Threading.Thread.Sleep(1000);
-                
+
             }
         }
         static void Main(string[] args)
         {
-
             // Cheat Init
             if (HamsterCheese.AmongUsMemory.Cheese.Init())
             { 
